@@ -1,7 +1,7 @@
-CREATE OR REPLACE PROCEDURE POPULATE_TABLES()
-BEGIN
-    DECLARE v_url CLOB(2G);
-    DECLARE v_response CLOB(2G);
+CREATE OR REPLACE PROCEDURE popdata()
+P1: BEGIN
+    DECLARE v_url CLOB(10M);
+    DECLARE v_response CLOB(10M);
     DECLARE v_dept_no CHAR(3);
     DECLARE v_dept_name VARCHAR(36);
     DECLARE v_mgr_no CHAR(6);
@@ -24,27 +24,13 @@ BEGIN
     DECLARE i INT;
     DECLARE dept_cursor CURSOR FOR SELECT DEPTNO FROM DEPARTMENT;
 
-    -- Populate DEPARTMENT table
-    SET i = 1;
-    WHILE i <= 10 DO
-        SET v_url = 'https://api.mockaroo.com/api/0b43d0e0?count=1&key=your_api_key';
-        SET v_response = SYSTOOLS.HTTPGETCLOB(v_url);
-        SET v_dept_no = JSON_VALUE(v_response, '$[0].DEPTNO');
-        SET v_dept_name = JSON_VALUE(v_response, '$[0].DEPTNAME');
-        SET v_mgr_no = JSON_VALUE(v_response, '$[0].MGRNO');
-        SET v_admr_dept = JSON_VALUE(v_response, '$[0].ADMRDEPT');
-        SET v_location = JSON_VALUE(v_response, '$[0].LOCATION');
-        
-        INSERT INTO DEPARTMENT (DEPTNO, DEPTNAME, MGRNO, ADMRDEPT, LOCATION)
-        VALUES (v_dept_no, v_dept_name, v_mgr_no, v_admr_dept, v_location);
-        SET i = i + 1;
-    END WHILE;
+
     
     -- Populate EMPLOYEE table
     SET i = 1;
     WHILE i <= 500 DO
         SET v_url = 'https://randomuser.me/api/';
-        SET v_response = SYSTOOLS.HTTPGETCLOB(v_url);
+        SET v_response = SYSTOOLS.HTTPGETCLOB(v_url, NULL);
         SET v_emp_no = SUBSTR(HEX(RAND()), 1, 6);
         SET v_first_name = JSON_VALUE(v_response, '$.results[0].name.first');
         SET v_mid_init = SUBSTR(JSON_VALUE(v_response, '$.results[0].name.first'), 1, 1);
@@ -59,15 +45,17 @@ BEGIN
         SET v_hire_date = DATE('2023-01-01') + INT(RAND() * 365 * 10) DAYS;
         SET v_job = 'JOB' || SUBSTR(HEX(RAND()), 1, 4);
         SET v_ed_level = 12 + INT(RAND() * 8);
-        SET v_sex = JSON_VALUE(v_response, '$.results[0].gender')[1];
+        SET v_sex = 'M';
         SET v_birth_date = DATE('1960-01-01') + INT(RAND() * 365 * 50) DAYS;
         SET v_salary = DECIMAL(30000 + RAND() * 70000, 9, 2);
         SET v_bonus = DECIMAL(RAND() * 10000, 9, 2);
         SET v_comm = DECIMAL(RAND() * 5000, 9, 2);
         
-        INSERT INTO EMPLOYEE (EMPNO, FIRSTNME, MIDINIT, LASTNAME, WORKDEPT, PHONENO, HIREDATE, JOB, EDLEVEL, SEX, BIRTHDATE, SALARY, BONUS, COMM)
-        VALUES (v_emp_no, v_first_name, v_mid_init, v_last_name, v_work_dept, v_phone_no, v_hire_date, v_job, v_ed_level, v_sex, v_birth_date, v_salary, v_bonus, v_comm);
+        INSERT INTO EMPLOYEE 
+        (EMPNO, FIRSTNME, MIDINIT, LASTNAME, WORKDEPT, PHONENO, HIREDATE, JOB, EDLEVEL, SEX, BIRTHDATE, SALARY, BONUS, COMM)
+        VALUES (v_emp_no, v_first_name, v_mid_init, v_last_name, v_work_dept, v_phone_no, v_hire_date, v_job, v_ed_level, 
+        v_sex, v_birth_date, v_salary, v_bonus, v_comm);
         
         SET i = i + 1;
     END WHILE;
-END;
+END P1;
