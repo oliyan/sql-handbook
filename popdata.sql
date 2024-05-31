@@ -21,9 +21,12 @@ BEGIN
     DECLARE v_salary DECIMAL(9,2);
     DECLARE v_bonus DECIMAL(9,2);
     DECLARE v_comm DECIMAL(9,2);
-    
+    DECLARE i INT;
+    DECLARE dept_cursor CURSOR FOR SELECT DEPTNO FROM DEPARTMENT;
+
     -- Populate DEPARTMENT table
-    FOR i IN 1..10 DO
+    SET i = 1;
+    WHILE i <= 10 DO
         SET v_url = 'https://api.mockaroo.com/api/0b43d0e0?count=1&key=your_api_key';
         SET v_response = SYSTOOLS.HTTPGETCLOB(v_url);
         SET v_dept_no = JSON_VALUE(v_response, '$[0].DEPTNO');
@@ -34,20 +37,27 @@ BEGIN
         
         INSERT INTO DEPARTMENT (DEPTNO, DEPTNAME, MGRNO, ADMRDEPT, LOCATION)
         VALUES (v_dept_no, v_dept_name, v_mgr_no, v_admr_dept, v_location);
-    END FOR;
+        SET i = i + 1;
+    END WHILE;
     
     -- Populate EMPLOYEE table
-    FOR i IN 1..500 DO
+    SET i = 1;
+    WHILE i <= 500 DO
         SET v_url = 'https://randomuser.me/api/';
         SET v_response = SYSTOOLS.HTTPGETCLOB(v_url);
-        SET v_emp_no = SUBSTR(HEX(RANDOM()), 1, 6);
+        SET v_emp_no = SUBSTR(HEX(RAND()), 1, 6);
         SET v_first_name = JSON_VALUE(v_response, '$.results[0].name.first');
         SET v_mid_init = SUBSTR(JSON_VALUE(v_response, '$.results[0].name.first'), 1, 1);
         SET v_last_name = JSON_VALUE(v_response, '$.results[0].name.last');
-        SET v_work_dept = (SELECT DEPTNO FROM DEPARTMENT ORDER BY RAND() FETCH FIRST 1 ROW ONLY);
-        SET v_phone_no = SUBSTR(HEX(RANDOM()), 1, 4);
+        
+        -- Assign a random department from DEPARTMENT table
+        OPEN dept_cursor;
+        FETCH FROM dept_cursor INTO v_work_dept;
+        CLOSE dept_cursor;
+        
+        SET v_phone_no = SUBSTR(HEX(RAND()), 1, 4);
         SET v_hire_date = DATE('2023-01-01') + INT(RAND() * 365 * 10) DAYS;
-        SET v_job = 'JOB' || SUBSTR(HEX(RANDOM()), 1, 4);
+        SET v_job = 'JOB' || SUBSTR(HEX(RAND()), 1, 4);
         SET v_ed_level = 12 + INT(RAND() * 8);
         SET v_sex = JSON_VALUE(v_response, '$.results[0].gender')[1];
         SET v_birth_date = DATE('1960-01-01') + INT(RAND() * 365 * 50) DAYS;
@@ -57,5 +67,7 @@ BEGIN
         
         INSERT INTO EMPLOYEE (EMPNO, FIRSTNME, MIDINIT, LASTNAME, WORKDEPT, PHONENO, HIREDATE, JOB, EDLEVEL, SEX, BIRTHDATE, SALARY, BONUS, COMM)
         VALUES (v_emp_no, v_first_name, v_mid_init, v_last_name, v_work_dept, v_phone_no, v_hire_date, v_job, v_ed_level, v_sex, v_birth_date, v_salary, v_bonus, v_comm);
-    END FOR;
+        
+        SET i = i + 1;
+    END WHILE;
 END;
