@@ -2,7 +2,6 @@ create or replace procedure cmpsys.popemp()
 P1: BEGIN
     declare v_url CLOB(10M);
     declare v_response CLOB(10M);
-    declare v_dept_no char(3);
     declare v_dept_name varchar(36);
     declare v_mgr_no char(6);
     declare v_admr_dept char(3);
@@ -37,7 +36,7 @@ P1: BEGIN
         
         -- Assign a random department from DEPARTMENT table
         select  deptno
-        into    v_dept_no
+        into    v_work_dept
         from    cmpsys.department
         order by rand()
         fetch   first row only;
