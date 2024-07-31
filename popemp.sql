@@ -29,7 +29,7 @@ P1: BEGIN
     while i <= 200 DO
         set v_url = 'https://randomuser.me/api/?nat=in';
         set v_response = SYSTOOLS.HTTPGETCLOB(v_url, NULL);
-        set v_emp_no = substr(HEX(rand()), 1, 6);
+        set v_emp_no = i;
         set v_first_name = json_value(v_response, '$.results[0].name.first');
         set v_mid_init = substr(json_value(v_response, '$.results[0].name.first'), 1, 1);
         set v_last_name = json_value(v_response, '$.results[0].name.last');
@@ -51,18 +51,13 @@ P1: BEGIN
         set v_bonus = decimal(rand() * 10000, 9, 2);
         set v_comm = decimal(rand() * 5000, 9, 2);
 
-        if not exists(
-            select   1 
-            from     cmpsys.employee 
-            where    empno = v_emp_no) then
-            
-            insert into cmpsys.EMPLOYEE 
-            (EMPNO, FIRSTNME, MIDINIT, LASTNAME, WORKDEPT, PHONENO, HIREdate, JOB, EDLEVEL, SEX, BIRTHdate, SALARY, BONUS, COMM)
-            VALUES (v_emp_no, v_first_name, v_mid_init, v_last_name, v_work_dept, v_phone_no, v_hire_date, v_job, v_ed_level, 
-            v_sex, v_birth_date, v_salary, v_bonus, v_comm);
         
-            set i = i + 1;
-        end if;
+        insert into cmpsys.EMPLOYEE 
+        (EMPNO, FIRSTNME, MIDINIT, LASTNAME, WORKDEPT, PHONENO, HIREdate, JOB, EDLEVEL, SEX, BIRTHdate, SALARY, BONUS, COMM)
+        VALUES (v_emp_no, v_first_name, v_mid_init, v_last_name, v_work_dept, v_phone_no, v_hire_date, v_job, v_ed_level, 
+        v_sex, v_birth_date, v_salary, v_bonus, v_comm);
+        
+        set i = i + 1;
         
     end while;
 end P1;
