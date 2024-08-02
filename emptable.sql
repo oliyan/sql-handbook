@@ -22,3 +22,5 @@ CREATE OR REPLACE TABLE ravi.EMPLOYEE
        BONUS       DECIMAL(9,2)            ,
        COMM        DECIMAL(9,2)            ,    
        PRIMARY KEY (EMPNO)); 
+
+-- comment
